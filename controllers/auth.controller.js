@@ -17,7 +17,18 @@ exports.register = async (req, res) => {
       balance: 5000000, // default balance
     });
 
-    res.status(201).send({ message: "User registered successfully!", user });
+    // Exclude password manually
+    const userResponse = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phonenumber: user.phonenumber,
+      balance: user.balance,
+    };
+
+    res
+      .status(201)
+      .send({ message: "User registered successfully!", user: userResponse });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -38,7 +49,12 @@ exports.login = async (req, res) => {
       expiresIn: 86400, // 24 hours
     });
 
-    res.status(200).send({ user, accessToken: token });
+    // Convert user instance to plain object
+    const userObject = user.get({ plain: true });
+    // Remove the password field
+    delete userObject.password;
+
+    res.status(200).send({ user: userObject, accessToken: token });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
