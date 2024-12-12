@@ -7,14 +7,23 @@ const User = db.user;
 exports.register = async (req, res) => {
   try {
     const { fullName, email, password, phonenumber } = req.body;
+
+    // Cek apakah email sudah terdaftar
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).send({ message: "Email already registered!" });
+    }
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 8);
 
+    // Buat user baru
     const user = await User.create({
       fullName,
       email,
       password: hashedPassword,
       phonenumber,
-      balance: 5000000, // default balance
+      balance: 5000000, // Default balance
     });
 
     // Exclude password manually
